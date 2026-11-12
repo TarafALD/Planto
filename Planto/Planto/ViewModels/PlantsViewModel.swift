@@ -9,7 +9,10 @@ import SwiftUI
 @Observable //makes a class notify the screens when its data changes
 
 class PlantsViewModel {
-    var plants: [Plant] = []
+    var plants: [Plant] = [
+        Plant(name: "Pothos", room: .bedroom, light: .lowLight, wateringDays: .onceAWeek, water: .ml50to100),
+        Plant(name: "dd", room: .bedroom, light: .lowLight, wateringDays: .onceAWeek, water: .ml50to100)
+    ]
     
     func add(_ plant: Plant) {
         var plant = plant
@@ -37,8 +40,16 @@ class PlantsViewModel {
         }
     }
     
+    
     var allWatered: Bool {
         plants.allSatisfy { $0.isWatered }
+    }
+    
+    var wateredCount: Int {
+        plants.filter { $0.isWatered }.count
+    }
+    var progress: Double {
+        plants.isEmpty ? 0 : Double(wateredCount) / Double(plants.count)
     }
 
 }
