@@ -10,14 +10,23 @@ import SwiftUI
 
 class PlantsViewModel {
     var plants: [Plant] = [
-        Plant(name: "Pothos", room: .bedroom, light: .lowLight, wateringDays: .onceAWeek, water: .ml50to100),
-        Plant(name: "dd", room: .bedroom, light: .lowLight, wateringDays: .onceAWeek, water: .ml50to100)
-    ]
+    ]{didSet { refreshReminder() }}
+    
+    private func refreshReminder() {
+        if allWatered {
+            NotificationManager.cancelReminder()
+        } else {
+            NotificationManager.scheduleReminder()
+        }
+    }
+
     
     func add(_ plant: Plant) {
         var plant = plant
         plant.name = plant.name.trimmingCharacters(in: .whitespaces)
         guard !plant.name.isEmpty else { return }
+        
+        NotificationManager.requestPermission()
         plants.append(plant)
     }
     

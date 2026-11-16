@@ -9,10 +9,11 @@ import SwiftUI
 
 struct MyplantsView: View {
     
-    @AppStorage("isNewUser") private var isNewUser = false
+    @AppStorage("isNewUser") private var isNewUser = true
     @State private var viewModel = PlantsViewModel()
     @State private var showSheet = false
-    
+    @State private var plantToEdit: Plant?
+
     
     var body: some View {
         NavigationStack{
@@ -30,7 +31,7 @@ struct MyplantsView: View {
                         .multilineTextAlignment(.center).padding(.horizontal, 42)
                     
                     Button {
-                        
+                        showSheet = true
                     } label: {
                         Text("Set Plant Reminder")
                             .padding(.horizontal, 58)
@@ -38,14 +39,16 @@ struct MyplantsView: View {
                     .buttonStyle(.glassProminent)
                     .tint(.button)
                     .padding(.top, 72)
+                    Spacer()
                     
-                }/* else if viewModel.plants.isEmpty {
+                }else if viewModel.plants.isEmpty {
                   Spacer()
                   Text("No reminders set yet..").font(.system(.title2)).foregroundStyle(.noreminders).fontWeight(.semibold)
+                    Spacer()
                   
-                  }*/ /*else if viewModel.allWatered {
-                       //Spacer()
-                       Image("allplantsdone").padding(.bottom).padding(.top, 127)
+                  }else if viewModel.allWatered {
+                       Spacer()
+                       Image("allplantsdone").padding(.bottom)
                        
                        Text("All Done! 🎉").font(.system(size:25, weight: .bold))
                        
@@ -53,9 +56,10 @@ struct MyplantsView: View {
                        .font(.system(.callout))
                        .foregroundStyle(.noreminders)
                        .padding(.top, 4)
+                      Spacer()
                        
                        
-                       }*/ else {
+                       } else {
                            VStack(spacing: 16) {
                                Text(viewModel.wateredCount == 0
                                     ? "Your plants are waiting for a sip 💦"
@@ -116,7 +120,8 @@ struct MyplantsView: View {
                                    .frame(maxWidth: .infinity, alignment: .leading)
 
                                    .alignmentGuide(.listRowSeparatorLeading) { _ in 0 }
-                                   .alignmentGuide(.listRowSeparatorTrailing) { d in d.width }
+                                   .alignmentGuide(.listRowSeparatorTrailing) { d in d.width }.contentShape(.rect)
+                                   .onTapGesture { plantToEdit = plant }
                                    .swipeActions {
                                        Button(role: .destructive) {
                                            viewModel.delete(plant)
@@ -131,25 +136,33 @@ struct MyplantsView: View {
                        }
             }.navigationTitle("My Plants 🌱")
                 .overlay(alignment: .bottomTrailing) {
-                if !isNewUser {
-                    Button {
-                        showSheet = true
-                    } label: {
-                        Image(systemName: "plus")
-                            .font(.title2)
-                            .padding(8)
+                    if !isNewUser {
+                        Button {
+                            showSheet = true
+                        } label: {
+                            Image(systemName: "plus")
+                                .font(.title2)
+                                .padding(8)
+                        }
+                        .buttonStyle(.glassProminent)
+                        .buttonBorderShape(.circle)
+                        .tint(.button)
+                        .padding()
                     }
-                    .buttonStyle(.glassProminent)
-                    .buttonBorderShape(.circle)
-                    .tint(.button)
-                    .padding()
                 }
+                .sheet(isPresented: $showSheet) {
+                    SetReminderSheet(viewModel: viewModel)
+                }
+                .sheet(item: $plantToEdit) { plant in
+                    SetReminderSheet(viewModel: viewModel, plantToEdit: plant)
+                }
+                
             }
 
              
         }
     }
-}
+
 
 #Preview {
     MyplantsView()
